@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.AdminMapper">
+
+    <select id="selectDailySchedules" resultType="com.example.demo.dto.ScheduleAdminDto">
+        SELECT
+        s.SCHD_ID     as scheduleId,
+        s.STRT_DT     as startTime,
+        s.END_DT      as endTime,
+        b.BRCH_NM     as branchName,
+        p.PROG_NM     as programName,
+        st.STAFF_NM   as instructorName,
+        s.RSV_CNT     as currentCount,
+        s.MAX_NOP_CNT as maxCount,
+        s.STTS_CD     as status
+        FROM SCHEDULE s
+        JOIN PROGRAM p ON s.CLS_ID = p.PROG_ID
+        JOIN STAFF st ON s.STAFF_ID = st.STAFF_ID
+        JOIN BRANCH_STAFF bs ON st.STAFF_ID = bs.STAFF_ID
+        JOIN BRANCH b ON bs.BRCH_ID = b.BRCH_ID
+        <where>
+            <if test="date != null">
+                AND DATE(s.STRT_DT) = #{date}
+            </if>
+
+            <if test="branchId != null">
+                AND b.BRCH_ID = #{branchId}
+            </if>
+        </where>
+        ORDER BY s.STRT_DT ASC
+    </select>
+
+</mapper>

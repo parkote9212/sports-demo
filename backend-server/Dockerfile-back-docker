@@ -1,0 +1,32 @@
+# STAGE 1: 빌드
+FROM eclipse-temurin:21-jdk-jammy AS build
+WORKDIR /app
+
+# 1. Gradle 래퍼 및 설정 복사
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle settings.gradle .
+
+# [멘토 수정] Windows 줄바꿈 문자(\r) 제거 및 실행 권한 부여 (필수!)
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
+
+# 2. 종속성 설치 (캐싱 활용)
+RUN ./gradlew dependencies --no-daemon
+
+# 3. 소스 복사 및 빌드
+COPY src src
+RUN ./gradlew bootJar -x test --no-daemon
+
+# STAGE 2: 실행
+FROM eclipse-temurin:21-jre-alpine AS final
+
+# 보안을 위해 별도 유저 생성
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring
+
+WORKDIR /app
+# 빌드 결과물 복사
+COPY --from=build /app/build/libs/*.jar app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
