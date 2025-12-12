@@ -22,9 +22,9 @@
         JOIN BRANCH b ON bs.BRCH_ID = b.BRCH_ID
         <where>
             <if test="date != null">
-                AND DATE(s.STRT_DT) = #{date}
+                DATE(s.STRT_DT) = #{date}
             </if>
-
+            
             <if test="branchId != null">
                 AND b.BRCH_ID = #{branchId}
             </if>
